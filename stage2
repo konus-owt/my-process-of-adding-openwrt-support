@@ -6,7 +6,7 @@ The following is a workflow I've used to get started with adding OpenWrt support
 
 Start a new project in Claude and upload all the relevant files and information you've collected about the router. This might include:
     • Hardware specifications and chipset information.
-    • Etracted stock firmware files.
+    • Extracted stock dts file.
     • Boot logs and console output.
     • Existing DTS files or information from similar supported devices.
     • Any other technical documentation you've managed to find.
