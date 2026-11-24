@@ -271,3 +271,106 @@ The following resources are useful throughout the development process:
 - [TechInfoDepot](https://techinfodepot.shoutwiki.com/)
 
 ---
+
+
+# Using AI (Claude) to develop OpenWrt support for a new router
+
+The following is a workflow I've used to get started with adding OpenWrt support for a new router, using Claude (free tier) as an assistant.
+
+---
+
+## 1. Set up the project and provide context
+
+Start a new project in Claude and upload all the relevant files and information you've collected about the router. This might include:
+
+- Hardware specifications and chipset information.
+- Extracted stock DTS file.
+- Boot logs and console output.
+- Existing DTS files or information from similar supported devices.
+- Any other technical documentation you've managed to find.
+
+Give Claude a clear description of the project and establish some ground rules. For example:
+
+> Add OpenWrt support for a new router. Follow OpenWrt coding and style conventions. Keep answers short and provide only a couple of commands or tests at a time. I have a local build machine with Git already configured, but I'm not very experienced with Git, so guide me through the process slowly, using small, manageable steps.
+
+---
+
+## 2. Investigate the available information and create a plan
+
+Ask Claude to analyse the uploaded information, identify what is already known and what is missing, and propose a development plan. The initial goal should be to get a working initramfs image with basic Ethernet and flash support. A working initramfs allows you to boot OpenWrt without modifying the router's existing firmware. Once Ethernet is working, you can use it to make a complete backup of the stock firmware and transfer that backup to your PC for further investigation.
+
+---
+
+## 3. Investigate the stock firmware
+
+Once you have a firmware backup, use tools such as binwalk and other firmware analysis utilities to investigate its contents. Ideally, try to extract the original FDT/DTB or DTS file from the stock firmware. This can provide valuable information about the router's hardware configuration. If you manage to extract an original DTS, provide it to Claude and ask it to compare the information with your current OpenWrt DTS and suggest improvements. Stock firmware DTS files are often based on older kernel versions and may use outdated syntax or conventions. Claude is generally quite capable of translating these into the format and conventions used by current OpenWrt sources.
+
+---
+
+## 4. Work incrementally
+
+Avoid making too many changes at once. Break the development into small, manageable tasks and tackle them individually. For each change:
+
+1. Ask Claude to explain the proposed change before implementing it.
+2. Make the change and build a new image.
+3. Boot the image on the router using TFTP.
+4. Test the functionality and collect relevant boot logs or other output.
+5. Share the results with Claude and decide on the next step.
+
+When you get something to work, ask Claude to produce a concise progress summary covering:
+
+- What has been implemented and tested.
+- Which files have been changed.
+- What is known to work.
+- Any remaining problems or limitations.
+- Suggested next steps.
+
+Save this summary and add it to the project context. Then start a fresh chat for the next task, using the summary and relevant files as context. Keeping chats relatively short helps prevent Claude from losing track of the original objectives or going off on tangents. It also helps conserve the limited context and token allowance available on the free tier.
+
+---
+
+## 5. Use Git to track your changes
+
+Keep track of all modifications on your local OpenWrt build machine using Git. Since you're working incrementally, make sure you understand which files have changed and why. Ask Claude for guidance with Git commands when necessary, taking things one step at a time. Regularly review your changes so that you can identify and revert problematic modifications without losing previously working functionality. Keep rebuilding and testing new images throughout the process.
+
+---
+
+## 6. Prioritise hardware support
+
+Work through the hardware components in a sensible order. A suggested priority is:
+
+1. **Ethernet:** Get network connectivity working so you can transfer files and firmware backups.
+2. **Flash:** Identify and configure the flash device and its partitions.
+3. **USB:** Get USB ports and connected devices working.
+4. **Buttons:** Configure reset and other physical buttons.
+5. **Wi-Fi:** Get the wireless hardware working.
+6. **LEDs:** Configure status and activity indicators.
+7. **Installation and sysupgrade:** Implement the permanent installation and firmware upgrade procedures.
+
+Keep the initial focus on Ethernet and flash. These are particularly important because they provide the means to back up and recover the original firmware. Leave permanent flashing and sysupgrade functionality until the other components are working reliably.
+
+**Important:** Before attempting any permanent flash operations, make absolutely sure you have a complete and verified backup of the stock firmware and a reliable method of restoring it. Ideally, have a recovery method that does not depend on the router's normal firmware or boot process.
+
+---
+
+## 7. Final review and preparation for submission
+
+Once the router is working and the required functionality has been implemented, ask Claude to perform a final review of all the changed files on your local build machine.
+
+Have it check for:
+
+- Compliance with current OpenWrt coding and style conventions.
+- Correct DTS syntax and hardware definitions.
+- Unnecessary or redundant changes.
+- Correct partition definitions and firmware handling.
+- Any missing files or configuration requirements.
+- Potential problems with installation and sysupgrade.
+
+Once everything has been reviewed and tested, ask Claude to help combine the changes into a single, well-organised Git commit. The commit should have an appropriate message and include the relevant hardware specifications, supported features, installation instructions and recovery/restore instructions. Finally, push the changes to your GitHub account and open a pull request against the appropriate OpenWrt repository.
+
+---
+
+## 8. Follow up on the pull request
+
+Keep an eye on the pull request for comments and review feedback. OpenWrt developers may request additional information, changes or testing. Work through their feedback, make the necessary adjustments and update the pull request. Be prepared to repeat the build-and-test cycle as required until the submission is ready to be merged.
+
